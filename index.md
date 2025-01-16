@@ -636,7 +636,129 @@ The DebeziumListener class is a Spring-managed component that listens for real-t
     * Cleans up and stops the engine gracefully during application shutdown.
  
 
+[Back to top](#Index)
 
+---
+#### * MongoDB.java:
+
+##### Package Declaration
+```java
+package mit.edu.tv.listener;
+```
+
+##### Import Statements
+```java
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.List;
+```
+
+##### Class Declaration
+```java 
+public class MongoDB {
+```
+
+##### Test Connection Method
+```java
+
+    public void  testConnection() {
+        String connectionString = "mongodb://some-mongo:27017";
+        try {
+	    MongoClient mongoClient = MongoClients.create(connectionString); 
+            List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());
+            databases.forEach(db -> System.out.println(db.toJson()));
+        } catch(Exception e)
+	    {
+	    }
+
+    }
+```
+
+##### Insert Record Method
+```java
+    public void insertRecord(String record)
+    {
+        String connectionString = "mongodb://some-mongo:27017";
+	try {
+        MongoClient mongoClient = MongoClients.create(connectionString);
+        MongoDatabase database = mongoClient.getDatabase("myDatabase");
+        Document document = new Document();
+        document.append("recordId", "CDC");
+        document.append("value", record);          
+        database.getCollection("myCollection").insertOne(document);
+
+	} catch (Exception e)
+	{
+	}
+    }
+}
+
+```
+This MongoDB class provides two key methods: Tests the connection to a MongoDB server and logs the available databases, and inserts a record into a specified collection in MongoDB.
+
+
+[Back to top](#Index)
+
+
+<a class="anchor" id="Java"></a>
+### 3.3 Java-Quick-Start 
+
+---
+#### * ReadCDC.java:
+
+##### Package Declaration
+```java
+package com.mongodb.quickstart;
+```
+
+##### Import Statements
+```java
+import com.mongodb.client.*;
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Projections.*;
+import static com.mongodb.client.model.Sorts.descending;
+```
+
+##### Class Declaration
+```java
+public class ReadCDC {
+```
+
+##### Method
+```java
+    public static void main(String[] args) {
+        try (MongoClient mongoClient = MongoClients.create(System.getProperty("mongodb.uri"))) {
+            MongoDatabase sampleTrainingDB = mongoClient.getDatabase("myDatabase");
+            MongoCollection<Document> myCDCCollection = sampleTrainingDB.getCollection("myCollection");
+
+        Document cdcDocument = myCDCCollection.find(new Document("recordId", "CDC")).first();
+        System.out.println("CDC Record: " + cdcDocument.toJson());
+
+        }
+    }
+}
+```
+This script demonstrates how to read a specific CDC record from a MongoDB collection. The process involves:
+* Establishing a Connection: Using the MongoDB URI to connect to the server.
+* Accessing the Database and Collection: Navigating to the myDatabase database and myCollection collection.
+* Querying a CDC Record: Using a simple filter to find a document with recordId: CDC.
+* Outputting Results: Printing the retrieved document in JSON format.
+
+
+[Back to top](#Index)
+
+<a class="anchor" id="Analysis"></a>
+## 4. Analysis
 
 
 
