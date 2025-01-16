@@ -345,10 +345,8 @@ def timeloop():
 timeloop()
 ```
 
-%%html
-<div class = "red">
-    mysqldb.py:
-</div>
+
+<h1 style="color:blue;">mysqldb.py</h1>
 
 ##### Importing Required Modules
 ```python
