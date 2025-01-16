@@ -113,8 +113,9 @@ The Java-Quick-Start Repository sets a Java project with Maven and executes a Mo
 <a class="anchor" id="Flask"></a>
 ### 3.1 Flask Project
 
+---
 #### * index.html:
-
+---
 ##### DOCTYPE Declaration
 ```html
 <!DOCTYPE html>
@@ -263,8 +264,9 @@ This script renders a real-time map of bus locations using Mapbox GL JS. It dyna
 
 [Back to top](#Index)
 
+---
 #### * server.py:
-
+---
 ##### Import Statements
 ```python
 from threading import Timer
@@ -325,8 +327,9 @@ This script is responsible for continuously updating bus location data and servi
 
 [Back to top](#Index)
 
+---
 #### * timer.py:
-
+---
 ##### Import Statements
 ```python
 from threading import Timer
@@ -342,9 +345,9 @@ def timeloop():
 timeloop()
 ```
 
-
+---
 #### * mysqldb.py:
-
+---
 ##### Importing Required Modules
 ```python
 import mysql.connector
