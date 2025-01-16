@@ -789,7 +789,7 @@ df = pd.read_sql_query("SELECT * FROM mbta_buses",
 
 I then began my analysis. Here is the procedure and results of the analysis section:
 
-* What is the average time it takes for a bus to complete the route?
+#### * What is the average time it takes for a bus to complete the route?
 
 ```python
 # Convert the 'updated_at' column to a datetime format
@@ -828,12 +828,91 @@ if average_time:
 else:
     print("No completed routes found in the current dataset.")
 ```
-My result was: "Average time to complete the route: 133.76 minutes"
+The result was: "Average time to complete the route: 133.76 minutes"
 
 
-* Visualization based on the data for the average stop time per stop sequence:
+#### * Visualization based on the data for the average stop time per stop sequence:
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Calculate time differences between consecutive updates for each bus
+df['time_diff'] = df.groupby('id')['updated_at'].diff()
+
+# Filter for stopped buses (current_status == 'STOPPED_AT')
+stopped_df = df[df['current_status'] == 'STOPPED_AT'].copy()
+
+# Convert time difference to seconds for easier calculations
+stopped_df['time_diff_seconds'] = stopped_df['time_diff'].dt.total_seconds()
+
+# Group by current_stop_sequence and calculate the mean of time differences
+average_stop_times = stopped_df.groupby('current_stop_sequence')['time_diff_seconds'].mean()
+
+# Create the bar chart
+plt.figure(figsize=(12, 8))
+average_stop_times.plot(kind='bar')
+
+plt.xlabel('Current Stop Sequence')
+plt.ylabel('Average Stop Time (Seconds)')
+plt.title('Average Stop Time at Each Stop')
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+plt.tight_layout()
+plt.show()
+```
+
+The results were:
+
+<img width="800" height="400"  alt="Screenshot 2025-01-16 at 3 45 32 PM" src="https://github.com/user-attachments/assets/16e2dcf8-af1d-43be-8f34-02143ebbf88c" />
 
 
+#### * Estimate of the speed of the bus from current_stop_sequence = 1 to the last current_stop_sequence
+
+```python
+from haversine import haversine, Unit
+
+def calculate_bus_speed(data):
+    speeds = []
+
+    # Group by bus ID ('id') to analyze each bus separately
+    for bus_id, group in data.groupby('id'):
+        # Ensure data is sorted by 'current_stop_sequence'
+        group = group.sort_values(by=['current_stop_sequence', 'updated_at'])
+
+        # Get the rows for the first and last stops
+        start_row = group[group['current_stop_sequence'] == 1].iloc[0] if not group[group['current_stop_sequence'] == 1].empty else None
+        end_row = group[group['current_stop_sequence'] == group['current_stop_sequence'].max()].iloc[-1] if not group[group['current_stop_sequence'] == group['current_stop_sequence'].max()].empty else None
+
+        if start_row is not None and end_row is not None:
+            # Extract latitude and longitude
+            start_coords = (start_row['latitude'], start_row['longitude'])
+            end_coords = (end_row['latitude'], end_row['longitude'])
+
+            # Calculate the distance in kilometers
+            distance_km = haversine(start_coords, end_coords, unit=Unit.KILOMETERS)
+
+            # Calculate the time difference in hours
+            time_diff_hours = (end_row['updated_at'] - start_row['updated_at']).total_seconds() / 3600
+
+            # Avoid division by zero
+            if time_diff_hours > 0:
+                # Calculate speed in km/h
+                speed_kmh = distance_km / time_diff_hours
+                speeds.append(speed_kmh)
+
+    # Calculate the average speed across all buses
+    average_speed = sum(speeds) / len(speeds) if speeds else None
+
+    # Output the result
+    if average_speed:
+        print(f"Average speed of buses: {average_speed:.2f} km/h")
+    else:
+        print("No completed routes found to calculate speed.")
+
+
+calculate_bus_speed(df)
+```
+The result was: "Average speed of buses: 2.36 km/h"
 
 
 [Back to top](#Index)
