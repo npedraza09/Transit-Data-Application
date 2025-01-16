@@ -327,8 +327,61 @@ This script is responsible for continuously updating bus location data and servi
 
 #### * timer.py:
 
+##### Import Statements
+```python
+from threading import Timer
+import time
+```
+
+##### Timer Setup
+```python
+# sample 10 second timer
+def timeloop():
+    print(f'--- ' + time.ctime() + ' ---')
+    Timer(10, timeloop).start()
+timeloop()
+```
 
 
+#### * mysqldb.py:
+
+##### Importing Required Modules
+```python
+import mysql.connector
+```
+
+##### Function Definition
+```python
+def insertMBTARecord(mbtaList):
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="PASSWORD",
+    database="MBTAdb"
+    )
+
+    mycursor = mydb.cursor()
+```
+
+###### SQL query for Inserting Data
+```python
+    sql = """
+    insert into mbta_buses (route_number, id, latitude, longitude, bearing, current_status,
+                            current_stop_sequence, direction_id, occupancy_status, updated_at) 
+                            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+```
+
+###### Iterating Through the Data
+```python
+    for mbtaDict in mbtaList:
+        val = (mbtaDict['route_number'], mbtaDict['id'], mbtaDict['latitude'], mbtaDict['longitude'], mbtaDict['bearing'], 
+               mbtaDict['current_status'], mbtaDict['current_stop_sequence'], mbtaDict['direction_id'], mbtaDict['occupancy_status'], mbtaDict['updated_at'])
+        mycursor.execute(sql, val)
+
+    mydb.commit()
+```
+This script connects to a MySQL database and inserts records into the mbta_buses table. The key components include: Database Connection, Insert Query, Data Insertion Loop, and Commit.
 
 
 [Back to top](#Index)
