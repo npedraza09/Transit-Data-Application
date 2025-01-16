@@ -115,7 +115,7 @@ The Java-Quick-Start Repository sets a Java project with Maven and executes a Mo
 
 ---
 #### * index.html:
----
+
 ##### DOCTYPE Declaration
 ```html
 <!DOCTYPE html>
@@ -266,7 +266,7 @@ This script renders a real-time map of bus locations using Mapbox GL JS. It dyna
 
 ---
 #### * server.py:
----
+
 ##### Import Statements
 ```python
 from threading import Timer
@@ -329,7 +329,7 @@ This script is responsible for continuously updating bus location data and servi
 
 ---
 #### * timer.py:
----
+
 ##### Import Statements
 ```python
 from threading import Timer
@@ -347,7 +347,7 @@ timeloop()
 
 ---
 #### * mysqldb.py:
----
+
 ##### Importing Required Modules
 ```python
 import mysql.connector
@@ -385,6 +385,12 @@ def insertMBTARecord(mbtaList):
     mydb.commit()
 ```
 This script connects to a MySQL database and inserts records into the mbta_buses table. The key components include: Database Connection, Insert Query, Data Insertion Loop, and Commit.
+
+[Back to top](#Index)
+
+---
+#### * client.py:
+
 
 
 [Back to top](#Index)
