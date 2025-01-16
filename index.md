@@ -765,7 +765,7 @@ This script demonstrates how to read a specific CDC record from a MongoDB collec
 * Outputting Results: Printing the retrieved document in JSON format.
 
 
-#### JavaMaven Server Output:
+#### JavaMaven Server Output in CLI:
 <img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/0e9fe057-9e73-4c1b-aa2d-ee8ec201b905" />
 
 
