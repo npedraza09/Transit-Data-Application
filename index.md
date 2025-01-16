@@ -346,7 +346,7 @@ timeloop()
 ```
 
 
-<h1 style="color:blue;">mysqldb.py</h1>
+<span style="color:red; font-size:10px;">mysqldb.py</span>
 
 ##### Importing Required Modules
 ```python
