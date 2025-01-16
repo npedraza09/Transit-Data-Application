@@ -10,10 +10,9 @@
     - [2.2 Repositories](#Repositories)
     - [2.3 Files](#Files)
 - [3. Code](#Code)
-    - [3.1 Web App and API](#App)
-    - [3.2 DebeziumCDC](#DebeziumCDC)
-    - [3.3 MongoDB Server](#MongoDB)
-    - [3.4 JavaMaven Server](#JavaMaven)
+    - [3.1 Flask Project](#Flask)
+    - [3.2 DebeziumCDC](#Debezium)
+    - [3.3 Java-Quick-Start](#Java)
 - [4. Analysis](#Analysis)
 - [5. Conclusion](#Conclusion)
 
@@ -111,11 +110,155 @@ The Java-Quick-Start Repository sets a Java project with Maven and executes a Mo
 <a class="anchor" id="Code"></a>
 ## 3. Code
 
-<a class="anchor" id="App"></a>
-### 3.1 Web App and API
+<a class="anchor" id="Flask"></a>
+### 3.1 Flask Project
 
+#### * index.html:
 
+##### DOCTYPE Declaration
+```html
+<!DOCTYPE html>
+```
 
+##### HTML tag
+```html
+<html>
+```
+
+##### Head Section
+```html
+<head>
+<meta charset="utf-8" />
+<title>Real-Time Bus Tracker</title>
+<script src="https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.css" rel="stylesheet" />
+<style>
+  body { margin: 0; padding: 0; }
+  #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+</style>
+</head>
+```
+
+##### Body Section
+```html
+<body>
+  
+<div id="map"></div>
+ 
+<script>
+```
+
+###### Map Initialization
+```html
+mapboxgl.accessToken = 'XXXX';
+
+let map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [-71.091542, 42.358862],
+    zoom: 12
+});
+```
+
+###### Dynamic Marker Management
+```html
+let markers = {};
+
+// Initialize map and start updating markers
+async function init() {
+    await updateMarkers();
+    setInterval(updateMarkers, 15000); // Update every 15 seconds
+}
+
+// Fetch bus data and update markers
+async function updateMarkers() {
+    try {
+        const busLocations = await getBusLocations();
+
+        // Update or add markers based on new data
+        busLocations.forEach(bus => {
+            if (markers[bus.id]) {
+                moveMarker(markers[bus.id], bus);
+            } else {
+                addMarker(bus);
+            }
+        });
+
+        // Remove markers for buses no longer in the data
+        const busIds = busLocations.map(bus => bus.id);
+        for (let id in markers) {
+            if (!busIds.includes(id)) {
+                markers[id].remove();
+                delete markers[id];
+            }
+        }
+
+        console.log(`Updated at ${new Date()}`);
+    } catch (error) {
+        console.error("Error fetching bus locations:", error);
+    }
+}
+```
+
+###### Server Communication 
+```html
+// Fetch bus locations from server
+async function getBusLocations() {
+    const url = '/location'; 
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+}
+```
+
+###### Marker Creation and Updates
+```html
+// Add a new marker for a bus
+function addMarker(bus) {
+    const color = getColor(bus);
+    const marker = new mapboxgl.Marker({ color })
+        .setLngLat([bus.longitude, bus.latitude])
+        .addTo(map);
+
+    markers[bus.id] = marker; // Store marker by bus ID
+}
+
+// Update an existing marker's position and color
+function moveMarker(marker, bus) {
+    const newColor = getColor(bus);
+
+    if (marker._color !== newColor) {
+        const markerElement = marker.getElement();
+        markerElement.querySelector('svg').setAttribute("fill", newColor);
+        marker._color = newColor;
+    }
+
+    marker.setLngLat([bus.longitude, bus.latitude]);
+}
+```
+
+###### Marker Color Logic
+```html
+// Determine marker color based on bus direction
+function getColor(bus) {
+    return bus.direction > 0 ? 'black' : 'red';
+}
+```
+###### Script Initialization
+```html
+// Start the map application
+window.onload = init;
+
+</script>
+</body>
+</html>
+
+```
+This script renders a real-time map of bus locations using Mapbox GL JS. It dynamically fetches bus data from a server, updates bus markers, and removes markers for buses no longer in service. The CSS and Mapbox integration ensure the map looks polished and functional, with color-coded markers indicating bus directions.
 
 
 
