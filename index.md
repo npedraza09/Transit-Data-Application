@@ -345,8 +345,8 @@ def timeloop():
 timeloop()
 ```
 
-
-<span style="color:red; font-size:10px;">mysqldb.py</span>
+---
+#### * mysqldb.py
 
 ##### Importing Required Modules
 ```python
@@ -390,6 +390,254 @@ This script connects to a MySQL database and inserts records into the mbta_buses
 
 ---
 #### * client.py:
+
+##### Import Statements
+```python
+from threading import Timer
+import urllib.request
+import time
+import json
+```
+
+##### Location Function Definiton
+```python
+def locations():
+    url = "http://localhost:3000/location"
+    response = urllib.request.urlopen(url).read()
+    data = json.loads(response)
+    for bus in data:
+        print(bus)
+```
+
+##### Timeloop Function Definition
+```python
+def timeloop():
+    print(f'--- ' + time.ctime() + ' ---')
+    locations()
+    Timer(10, timeloop).start()
+timeloop()
+```
+This script acts as a client application that fetches real-time data, prints bus details, and automates fetching with a timeloop.
+
+
+---
+#### * MBTAApiClient.py:
+
+##### Import Statements
+```python
+import urllib.request, json
+import mysqldb
+```
+
+##### Call MBTA Api Function
+```python 
+def callMBTAApi():
+    mbtaDictList = []
+    mbtaUrl = 'https://api-v3.mbta.com/vehicles?filter[route]=1&include=trip'
+    with urllib.request.urlopen(mbtaUrl) as url:
+        data = json.loads(url.read().decode())
+        for bus in data['data']:
+            busDict = dict()
+            # complete the fields below based on the entries of your SQL table
+            busDict['route_number'] = 1
+            busDict['id'] = bus['id']
+            busDict['latitude'] = bus['attributes']['latitude']
+            busDict['longitude'] = bus['attributes']['longitude']
+            busDict['bearing'] = bus['attributes']['bearing']
+            busDict['current_status'] = bus['attributes']['current_status']
+            busDict['current_stop_sequence'] = bus['attributes']['current_stop_sequence']
+            busDict['direction_id'] = bus['attributes']['direction_id']
+            busDict['occupancy_status'] = bus['attributes']['occupancy_status']
+            busDict['updated_at'] = bus['attributes']['updated_at']
+            mbtaDictList.append(busDict)
+    mysqldb.insertMBTARecord(mbtaDictList) 
+
+    return mbtaDictList  
+```
+This script defines a function, callMBTAApi, to:
+* Fetch Bus Data: Sends a GET request to the MBTA API for bus locations on route 1.
+* Process Data: Converts the API response into a structured list of dictionaries, each representing a bus.
+* Store in Database: Saves the processed bus data into a MySQL database using the mysqldb.insertMBTARecord function.
+* Return Processed Data: Outputs the list of dictionaries for potential further use.
+
+
+[Back to top](#Index)
+
+
+<a class="anchor" id="Debezium"></a>
+### 3.2 DebeziumCDC 
+
+---
+#### * DebeziumConnectorConfig.java:
+
+##### Package Declaration
+```java
+package mit.edu.tv.config;
+```
+
+##### Import Statements
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.io.File;
+import java.io.IOException;
+```
+
+##### Package Declaration
+```java
+@Configuration
+public class DebeziumConnectorConfig {
+```
+
+##### Method Declaration
+```java
+    /**
+     * Customer Database Connector Configuration
+     */
+    @Bean
+    public io.debezium.config.Configuration customerConnector() throws IOException {
+
+        System.out.println("------------------------------------------------------");
+        String absolutePath = System.getProperty("user.dir");
+        File f = new File(absolutePath);
+        String parent = f.getParent();
+        String offsetFile = parent + "/student-offset.dat";
+        String historyFile = parent + "/student-history.dat";
+        System.out.println(offsetFile);
+        System.out.println(historyFile);        
+        System.out.println("------------------------------------------------------");         
+
+
+        return io.debezium.config.Configuration.create()
+            .with("name", "customer-mysql-connector")
+            .with("connector.class", "io.debezium.connector.mysql.MySqlConnector")
+            .with("offset.storage", "org.apache.kafka.connect.storage.FileOffsetBackingStore")
+            .with("offset.storage.file.filename", offsetFile)
+            .with("offset.flush.interval.ms", "60000")
+            .with("database.hostname", "mysqlserver")
+            .with("database.port", 3306)
+            .with("database.user", "root")
+            .with("database.password", "PASSWORD")
+            .with("database.dbname", "MBTAdb")
+            .with("database.include.list", "MBTAdb")
+            .with("include.schema.changes", "false")
+            .with("database.allowPublicKeyRetrieval", "true")
+            .with("database.server.id", "10181")
+            .with("database.server.name", "localhost_MBTAdb")
+            .with("database.history", "io.debezium.relational.history.FileDatabaseHistory")
+            .with("database.history.file.filename", historyFile)
+            .build();
+    }
+}
+```
+This script configures a Debezium MySQL connector for change data capture (CDC). The major sections include:
+* Package and Imports: Sets up the necessary libraries and organizes the configuration into the config package.
+* Class Declaration: Defines the DebeziumConnectorConfig class as a Spring configuration class.
+* Logging and File Path Setup: Constructs file paths for offset and history files, ensuring the connector can track its state.
+* Debezium Connector Configuration: Specifies key settings for the connector, such as database connection details, storage options, and monitoring preferences.
+* Spring Bean Creation: Returns the connector configuration as a Spring bean, allowing it to be injected and managed by the Spring framework.
+
+[Back to top](#Index)
+
+---
+#### * DebeziumListener.java:
+
+##### Package Declaration
+```java
+package mit.edu.tv.listener;
+```
+
+##### Import Statements
+```java
+import io.debezium.config.Configuration;
+import io.debezium.embedded.Connect;
+import io.debezium.engine.DebeziumEngine;
+import io.debezium.engine.RecordChangeEvent;
+import io.debezium.engine.format.ChangeEventFormat;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.connect.source.SourceRecord;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+```
+
+##### Class Declarations
+```java
+@Slf4j
+@Component
+public class DebeziumListener {
+```
+
+##### Field Declarations
+```java
+    private final Executor executor = Executors.newSingleThreadExecutor();
+    private final DebeziumEngine<RecordChangeEvent<SourceRecord>> debeziumEngine;
+```
+
+##### Constructor
+```java
+    public DebeziumListener(Configuration customerConnectorConfiguration) {
+
+        this.debeziumEngine = DebeziumEngine.create(ChangeEventFormat.of(Connect.class))
+            .using(customerConnectorConfiguration.asProperties())
+            .notifying(this::handleChangeEvent)
+            .build();
+
+        // this.customerService = customerService;
+    }
+```
+
+##### Handle Change Event Method
+```java
+    private void handleChangeEvent(RecordChangeEvent<SourceRecord> sourceRecordRecordChangeEvent) {
+        SourceRecord sourceRecord = sourceRecordRecordChangeEvent.record();
+
+
+        MongoDB mongoDB = new MongoDB();
+        mongoDB.testConnection();
+        mongoDB.insertRecord(sourceRecord.value().toString());
+        
+
+        System.out.println("Key = '" + sourceRecord.key() + "' value = '" + sourceRecord.value() + "'");
+    }
+```
+
+
+##### Lifecycle Management
+```java
+    @PostConstruct
+    private void start() {
+        this.executor.execute(debeziumEngine);
+    }
+
+    @PreDestroy
+    private void stop() throws IOException {
+        if (this.debeziumEngine != null) {
+            this.debeziumEngine.close();
+        }
+    }
+
+}
+
+```
+The DebeziumListener class is a Spring-managed component that listens for real-time database change events using the Debezium engine. It performs the following key actions:
+* Initialization:
+    * Sets up the Debezium engine using configuration and registers the event handler (handleChangeEvent).
+    * Runs the engine on a separate thread.
+* Change Event Handling:
+    * Processes each database change event, extracts its data, and stores it in MongoDB.
+* Lifecycle Management:
+    * Automatically starts the Debezium engine when the application initializes.
+    * Cleans up and stops the engine gracefully during application shutdown.
+ 
+
+
+
 
 
 
