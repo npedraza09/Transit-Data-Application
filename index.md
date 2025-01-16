@@ -464,6 +464,11 @@ This script defines a function, callMBTAApi, to:
 [Back to top](#Index)
 
 
+#### Web application display:
+
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/7fcb658a-2cc4-4cb6-813a-9f604351e9ae" />
+
+
 <a class="anchor" id="Debezium"></a>
 ### 3.2 DebeziumCDC 
 
@@ -866,7 +871,7 @@ The results were:
 <img width="800" height="400"  alt="Screenshot 2025-01-16 at 3 45 32 PM" src="https://github.com/user-attachments/assets/16e2dcf8-af1d-43be-8f34-02143ebbf88c" />
 
 
-#### * Estimate of the speed of the bus from current_stop_sequence = 1 to the last current_stop_sequence
+#### * Estimate of the speed of the bus from current_stop_sequence = 1 to the last current_stop_sequence:
 
 ```python
 from haversine import haversine, Unit
