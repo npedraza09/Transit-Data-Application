@@ -706,6 +706,11 @@ public class MongoDB {
 This MongoDB class provides two key methods: Tests the connection to a MongoDB server and logs the available databases, and inserts a record into a specified collection in MongoDB.
 
 
+#### Debezium Server Output in CLI:
+
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/a51d4322-97b7-414c-bd95-92f6d38cf900" />
+
+
 [Back to top](#Index)
 
 
@@ -758,6 +763,10 @@ This script demonstrates how to read a specific CDC record from a MongoDB collec
 * Accessing the Database and Collection: Navigating to the myDatabase database and myCollection collection.
 * Querying a CDC Record: Using a simple filter to find a document with recordId: CDC.
 * Outputting Results: Printing the retrieved document in JSON format.
+
+
+#### JavaMaven Server Output:
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/0e9fe057-9e73-4c1b-aa2d-ee8ec201b905" />
 
 
 [Back to top](#Index)
