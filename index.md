@@ -760,6 +760,79 @@ This script demonstrates how to read a specific CDC record from a MongoDB collec
 <a class="anchor" id="Analysis"></a>
 ## 4. Analysis
 
+I wanted to do some simple analysis for my web app, such as figuring out what is the average time it takes a bus to complete the route, creating some visualization for the average stop time per bus stop, and estimating the speed of the bus from current_stop_sequence = 1 to the last current_stop_sequence. I left my server running for 16 hours, collecting bus data, so I could do analysis with a big sample size.
+
+Libraries such as pandas, numpy, matplotlib, harversine, and many other, are great for the analysis I want to do on my data. Therefore, I first connected to my MySQL database, collected the data, and stored it in a dataframe. Check my code script below:
+
+```python
+import os
+import pymysql
+import pandas as pd
+
+host = '127.0.0.1'
+port = '3306'
+user = 'root'
+password = 'PASSWORD'
+database = 'MBTAdb'
+
+conn = pymysql.connect(
+    host=host,
+    port=int(3306),
+    user="root",
+    passwd=password,
+    db=database,
+    charset='utf8mb4')
+
+df = pd.read_sql_query("SELECT * FROM mbta_buses",
+    conn)
+```
+
+I then began my analysis. Here is the procedure and results of the analysis section:
+
+* What is the average time it takes for a bus to complete the route?
+
+```python
+# Convert the 'updated_at' column to a datetime format
+df['updated_at'] = pd.to_datetime(df['updated_at'])
+
+# Sort by bus ID ('id') and timestamp ('updated_at') for proper chronological order
+sorted_df = df.sort_values(by=['id', 'updated_at'])
+
+# Function to calculate route times for completed routes
+def calculate_route_times(data):
+    route_durations = []
+
+    # Group by bus ID ('id') to analyze each bus separately
+    for bus_id, group in data.groupby('id'):
+        # Ensure data is sorted by 'current_stop_sequence'
+        group = group.sort_values(by=['current_stop_sequence', 'updated_at'])
+
+        # Get rows where the bus is at the first and last stops
+        start_row = group[group['current_stop_sequence'] == 1].iloc[0] if not group[group['current_stop_sequence'] == 1].empty else None
+        end_row = group[group['current_stop_sequence'] == group['current_stop_sequence'].max()].iloc[-1] if not group[group['current_stop_sequence'] == group['current_stop_sequence'].max()].empty else None
+
+        # If both start and end exist, calculate duration
+        if start_row is not None and end_row is not None and end_row['updated_at'] > start_row['updated_at']:
+            duration = (end_row['updated_at'] - start_row['updated_at']).total_seconds() / 60  # Convert to minutes
+            route_durations.append(duration)
+
+    # Return the average duration for all completed routes
+    return sum(route_durations) / len(route_durations) if route_durations else None
+
+# Call the function and calculate the average time
+average_time = calculate_route_times(sorted_df)
+
+# Output the result
+if average_time:
+    print(f"Average time to complete the route: {average_time:.2f} minutes")
+else:
+    print("No completed routes found in the current dataset.")
+```
+My result was: "Average time to complete the route: 133.76 minutes"
+
+
+* Visualization based on the data for the average stop time per stop sequence:
+
 
 
 
