@@ -243,14 +243,13 @@ function moveMarker(marker, bus) {
 
 ###### Marker Color Logic
 ```html
-// Determine marker color based on bus direction
 function getColor(bus) {
     return bus.direction > 0 ? 'black' : 'red';
 }
 ```
+
 ###### Script Initialization
 ```html
-// Start the map application
 window.onload = init;
 
 </script>
@@ -258,8 +257,75 @@ window.onload = init;
 </html>
 
 ```
+
 This script renders a real-time map of bus locations using Mapbox GL JS. It dynamically fetches bus data from a server, updates bus markers, and removes markers for buses no longer in service. The CSS and Mapbox integration ensure the map looks polished and functional, with color-coded markers indicating bus directions.
 
+
+[Back to top](#Index)
+
+#### * server.py:
+
+##### Import Statements
+```python
+from threading import Timer
+from flask import Flask, render_template
+import time
+import json
+import MBTAApiClient
+```
+
+##### Initialization of Bus Data
+```python
+# Initialize buses list by doing an API call to the MBTA database below
+buses = MBTAApiClient.callMBTAApi()
+```
+
+##### Update and Helper Functions
+```python
+def update_data():
+    buses = MBTAApiClient.callMBTAApi()
+
+def status():
+    for bus in buses:
+        print(bus)
+
+def timeloop():
+    print(f'--- ' + time.ctime() + ' ---')
+    # status()
+    update_data()
+    Timer(10, timeloop).start()
+timeloop()
+```
+
+##### Web Server Initialization
+```python
+# create application instance
+app = Flask(__name__)
+
+# root route - landing page
+@app.route('/')
+def root():
+    return render_template('index.html')
+
+# root route - landing page
+@app.route('/location')
+def location():
+    return (json.dumps(buses))
+```
+
+##### Starting the Server
+```python
+# start server - note the port is 3000
+if __name__ == '__main__':
+    app.run(port=3000)
+```
+
+This script is responsible for continuously updating bus location data and serving it to a front-end map application for real-time visualization.
+
+
+[Back to top](#Index)
+
+#### * timer.py:
 
 
 
