@@ -943,3 +943,12 @@ While the project meets its initial goals, there are several enhancements that c
 
 Finally, integrating user feedback into the system could help prioritize enhancements and adapt the project to meet real-world needs. By continuously iterating and expanding, this project could evolve into a robust platform for optimizing public transportation systems, improving both operational efficiency and the commuter experience.
 
+### Tools:
+* Python
+* SQL
+* Java
+* HTML
+* JSON
+* Databases: MySQL, and MongoDB
+* Debezium
+* Libraries: Mapbox, flask, numpy, pandas, haversine, urllib, matplotlib, and threading
