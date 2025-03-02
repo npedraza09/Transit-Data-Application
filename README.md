@@ -52,6 +52,8 @@ Dmongodb.uri="mongodb://some-mongo:27017"`
 
 <img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/f66c7897-f793-4111-92a1-bf0d9dbbfc53" />
 
+<img width="800" height="400"  alt="Screenshot 2025-01-16 at 3 45 32 PM" src="https://github.com/user-attachments/assets/16e2dcf8-af1d-43be-8f34-02143ebbf88c" />
+
 
 
 
