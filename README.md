@@ -1,6 +1,6 @@
 <a href="https://npedraza09.github.io">Back to My Portfolio</a>
 
-# Transit Data Application
+# 🚌 Transit Data Application
 
 This project demonstrates a real-time bus tracking and data analysis system designed to monitor and analyze the performance of bus route 1 of the Massachusetts Bay Transportation Authority (MBTA). Using a web application integrated with a variety of servers and tools, the system collects, stores, and processes real-time bus location data. The architecture incorporates multiple technologies such as Flask, MySQL, Debezium, MongoDB, and Java, orchestrated in a Docker-based network called MBTANetwork. By continuously pulling data from the MBTA API, this project not only visualizes real-time bus movements but also provides insightful analysis such as route completion times, average stop durations, and estimated bus speeds.
 
